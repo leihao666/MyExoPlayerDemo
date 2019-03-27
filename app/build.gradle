@@ -55,6 +55,8 @@ dependencies {
     implementation "com.google.guava:guava:$rootProject.guavaVersion"
     implementation "com.jakewharton:butterknife:$butterknifeVersion"
     annotationProcessor "com.jakewharton:butterknife-compiler:$butterknifeVersion"
+    implementation 'com.google.android.exoplayer:exoplayer:2.9.6'
+    implementation 'de.hdodenhof:circleimageview:3.0.0'
     // Tests
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation 'com.android.support.test:runner:1.0.2'

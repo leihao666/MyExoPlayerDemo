@@ -2,8 +2,12 @@ package com.leihao.myexoplayerdemo.listing;
 
 import android.support.annotation.NonNull;
 
+import com.leihao.myexoplayerdemo.data.AudioBean;
 import com.leihao.myexoplayerdemo.data.network.AudioWebService;
 import com.leihao.myexoplayerdemo.data.network.wrapper.AudioListWrapper;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -52,6 +56,15 @@ final public class AudioListPresenter implements AudioListContract.Presenter {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .map(AudioListWrapper::getData)
+                .map(audioBeans -> {//清除空数据
+                    List<AudioBean> result = new ArrayList<>();
+                    for (AudioBean audioBean : audioBeans) {
+                        if (audioBean.speechUrl != null && !audioBean.speechUrl.isEmpty()) {
+                            result.add(audioBean);
+                        }
+                    }
+                    return result;
+                })
                 .subscribe(
                         // onNext
                         audioBeans -> {

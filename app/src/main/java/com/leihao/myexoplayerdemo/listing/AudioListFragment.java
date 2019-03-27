@@ -1,5 +1,6 @@
 package com.leihao.myexoplayerdemo.listing;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -10,9 +11,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
+import com.google.android.exoplayer2.util.Util;
 import com.leihao.myexoplayerdemo.R;
 import com.leihao.myexoplayerdemo.data.AudioBean;
 import com.leihao.myexoplayerdemo.di.ActivityScoped;
+import com.leihao.myexoplayerdemo.player.AudioPlayerBar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +42,11 @@ public class AudioListFragment extends DaggerFragment implements AudioListContra
 
     @BindView(R.id.audio_listing)
     RecyclerView audioListing;
+    @BindView(R.id.player_bar)
+    AudioPlayerBar player_bar;
+
+    private DataSource.Factory dataSourceFactory;
+    private SimpleExoPlayer player;
 
     private List<AudioBean> audioBeans = new ArrayList<>();
     private AudioListingAdapter adapter;
@@ -54,7 +69,11 @@ public class AudioListFragment extends DaggerFragment implements AudioListContra
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         audioListing.setLayoutManager(layoutManager);
         adapter = new AudioListingAdapter(audioBeans, audioBean -> {
-            Snackbar.make(audioListing, audioBean.speechName, Snackbar.LENGTH_SHORT).show();
+            player_bar.setVisibility(View.VISIBLE);
+            player_bar.setData(audioBean);
+            int position = audioBeans.indexOf(audioBean);
+            player_bar.seekTo(position);
+            player.setPlayWhenReady(true);
         });
         audioListing.setAdapter(adapter);
     }
@@ -63,6 +82,14 @@ public class AudioListFragment extends DaggerFragment implements AudioListContra
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mPresenter.takeView(this);
+        initPlayer();
+    }
+
+    private void initPlayer() {
+        player = ExoPlayerFactory.newSimpleInstance(getContext());
+        // Produces DataSource instances through which media data is loaded.
+        dataSourceFactory = new DefaultHttpDataSourceFactory(Util.getUserAgent(getContext(), "MyExoPlayerDemo"));
+        player_bar.setPlayer(player);
     }
 
     @Override
@@ -81,6 +108,17 @@ public class AudioListFragment extends DaggerFragment implements AudioListContra
         this.audioBeans.addAll(audioList);
         audioListing.setVisibility(View.VISIBLE);
         adapter.notifyDataSetChanged();
+
+        // This is the MediaSource representing the media to be played.
+        ConcatenatingMediaSource concatenatedSource = new ConcatenatingMediaSource();
+        for (AudioBean audioBean : this.audioBeans) {
+            if (audioBean.speechUrl != null && !audioBean.speechUrl.isEmpty()) {
+                MediaSource source = new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(Uri.parse(audioBean.speechUrl));
+                concatenatedSource.addMediaSource(source);
+            }
+        }
+        // Prepare the player with the source.
+        player.prepare(concatenatedSource);
     }
 
     @Override

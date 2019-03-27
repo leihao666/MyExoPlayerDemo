@@ -86,7 +86,7 @@ public class AudioListingAdapter extends RecyclerView.Adapter<AudioListingAdapte
         @BindView(R.id.tv_artist)
         TextView tv_artist;
 
-        public AudioBean audioBean;
+        AudioBean audioBean;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);

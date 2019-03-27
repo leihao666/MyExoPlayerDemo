@@ -10,4 +10,11 @@
         android:layout_height="match_parent"
         android:scrollbars="vertical"
         android:visibility="gone" />
+
+    <com.leihao.myexoplayerdemo.player.AudioPlayerBar
+        android:id="@+id/player_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:visibility="gone" />
 </FrameLayout>
