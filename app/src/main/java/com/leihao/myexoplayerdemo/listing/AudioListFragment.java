@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
@@ -70,12 +71,13 @@ public class AudioListFragment extends DaggerFragment implements AudioListContra
         audioListing.setLayoutManager(layoutManager);
         adapter = new AudioListingAdapter(audioBeans, audioBean -> {
             player_bar.setVisibility(View.VISIBLE);
-            player_bar.setData(audioBean);
             int position = audioBeans.indexOf(audioBean);
             player_bar.seekTo(position);
             player.setPlayWhenReady(true);
         });
         audioListing.setAdapter(adapter);
+
+        player_bar.setAudioList(audioBeans);
     }
 
     @Override
@@ -89,6 +91,7 @@ public class AudioListFragment extends DaggerFragment implements AudioListContra
         player = ExoPlayerFactory.newSimpleInstance(getContext());
         // Produces DataSource instances through which media data is loaded.
         dataSourceFactory = new DefaultHttpDataSourceFactory(Util.getUserAgent(getContext(), "MyExoPlayerDemo"));
+        player.setRepeatMode(Player.REPEAT_MODE_ALL);
         player_bar.setPlayer(player);
     }
 

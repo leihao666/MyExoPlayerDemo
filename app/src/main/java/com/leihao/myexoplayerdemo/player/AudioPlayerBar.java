@@ -14,6 +14,7 @@ import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -25,15 +26,20 @@ import com.google.android.exoplayer2.ControlDispatcher;
 import com.google.android.exoplayer2.DefaultControlDispatcher;
 import com.google.android.exoplayer2.PlaybackPreparer;
 import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.util.Assertions;
 import com.leihao.myexoplayerdemo.R;
 import com.leihao.myexoplayerdemo.data.AudioBean;
+
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class AudioPlayerBar extends FrameLayout {
 
+    @BindView(R.id.progress_horizontal)
+    ProgressBar progress_horizontal;
     @BindView(R.id.iv_pic)
     ImageView iv_pic;
     @BindView(R.id.tv_name)
@@ -42,6 +48,8 @@ public class AudioPlayerBar extends FrameLayout {
     TextView tv_artist;
     @BindView(R.id.iv_play)
     ImageView iv_play;
+    private final Timeline.Window window;
+    private final Runnable updateProgressAction;
 
     private Animation animation;
     private final Drawable playButtonDrawable;
@@ -55,6 +63,8 @@ public class AudioPlayerBar extends FrameLayout {
     private PlaybackPreparer playbackPreparer;
     private final Player.EventListener eventListener;
 
+    private List<AudioBean> audioBeans;
+
     public AudioPlayerBar(Context context) {
         this(context, null);
     }
@@ -65,7 +75,9 @@ public class AudioPlayerBar extends FrameLayout {
 
     public AudioPlayerBar(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        window = new Timeline.Window();
         controlDispatcher = new DefaultControlDispatcher();
+        updateProgressAction = this::updateProgress;
 
         LayoutInflater.from(context).inflate(R.layout.audio_player_bar, this);
         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
@@ -75,6 +87,12 @@ public class AudioPlayerBar extends FrameLayout {
             @Override
             public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
                 updatePlayPauseButton();
+                updateProgress();
+            }
+
+            @Override
+            public void onPositionDiscontinuity(int reason) {
+                updateNavigation();
             }
         };
         iv_play.setOnClickListener(v -> {
@@ -109,19 +127,8 @@ public class AudioPlayerBar extends FrameLayout {
                 resources.getString(com.google.android.exoplayer2.ui.R.string.exo_controls_pause_description);
     }
 
-    public void setData(AudioBean data) {
-        iv_pic.startAnimation(animation);
-        RequestOptions options = new RequestOptions()
-                .centerCrop()
-                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                .priority(Priority.NORMAL);
-        Glide.with(getContext())
-                .asBitmap()
-                .load(data.speechImage)
-                .apply(options)
-                .into(iv_pic);
-        tv_name.setText(data.speechName);
-        tv_artist.setText(data.speechDesc);
+    public void setAudioList(List<AudioBean> audioBeans) {
+        this.audioBeans = audioBeans;
     }
 
     /**
@@ -141,8 +148,7 @@ public class AudioPlayerBar extends FrameLayout {
      */
     public void setPlayer(@Nullable Player player) {
         Assertions.checkState(Looper.myLooper() == Looper.getMainLooper());
-        Assertions.checkArgument(
-                player == null || player.getApplicationLooper() == Looper.getMainLooper());
+        Assertions.checkArgument(player == null || player.getApplicationLooper() == Looper.getMainLooper());
         if (this.player == player) {
             return;
         }
@@ -158,6 +164,8 @@ public class AudioPlayerBar extends FrameLayout {
 
     private void updateAll() {
         updatePlayPauseButton();
+        updateNavigation();
+        updateProgress();
     }
 
     private void updatePlayPauseButton() {
@@ -175,6 +183,86 @@ public class AudioPlayerBar extends FrameLayout {
         }
         tv_name.setSelected(isPlaying());
         tv_artist.setSelected(isPlaying());
+    }
+
+    private void updateNavigation() {
+        if (!isVisible()) {
+            return;
+        }
+        Timeline timeline = player != null ? player.getCurrentTimeline() : null;
+        boolean haveNonEmptyTimeline = timeline != null && !timeline.isEmpty();
+        if (haveNonEmptyTimeline && !player.isPlayingAd()) {
+            int windowIndex = player.getCurrentWindowIndex();
+            timeline.getWindow(windowIndex, window);
+            if (audioBeans != null && audioBeans.size() > windowIndex) {
+                AudioBean bean = audioBeans.get(windowIndex);
+                updateAudioInfo(bean);
+            }
+        }
+    }
+
+    private void updateAudioInfo(AudioBean data) {
+        RequestOptions options = new RequestOptions()
+                .centerCrop()
+                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                .priority(Priority.NORMAL);
+        Glide.with(getContext())
+                .asBitmap()
+                .load(data.speechImage)
+                .apply(options)
+                .into(iv_pic);
+        tv_name.setText(data.speechName);
+        tv_artist.setText(data.speechDesc);
+    }
+
+    private void updateProgress() {
+        if (!isVisible()) {
+            return;
+        }
+
+        long position = 0;
+        long duration = 0;
+        if (player != null) {
+            long currentWindowTimeBarOffsetMs = 0;
+            long durationUs = 0;
+            Timeline timeline = player.getCurrentTimeline();
+            if (!timeline.isEmpty()) {
+                int currentWindowIndex = player.getCurrentWindowIndex();
+                currentWindowTimeBarOffsetMs = C.usToMs(durationUs);
+                timeline.getWindow(currentWindowIndex, window);
+                durationUs += window.durationUs;
+            }
+            duration = C.usToMs(durationUs);
+            position = currentWindowTimeBarOffsetMs + player.getContentPosition();
+        }
+        progress_horizontal.setProgress((int) (position / 1000));
+        progress_horizontal.setMax((int) (duration / 1000));
+
+        // Cancel any pending updates and schedule a new one if necessary.
+        removeCallbacks(updateProgressAction);
+        int playbackState = player == null ? Player.STATE_IDLE : player.getPlaybackState();
+        if (playbackState != Player.STATE_IDLE && playbackState != Player.STATE_ENDED) {
+            long delayMs;
+            if (player.getPlayWhenReady() && playbackState == Player.STATE_READY) {
+                float playbackSpeed = player.getPlaybackParameters().speed;
+                if (playbackSpeed <= 0.1f) {
+                    delayMs = 1000;
+                } else if (playbackSpeed <= 5f) {
+                    long mediaTimeUpdatePeriodMs = 1000 / Math.max(1, Math.round(1 / playbackSpeed));
+                    long mediaTimeDelayMs = mediaTimeUpdatePeriodMs - (position % mediaTimeUpdatePeriodMs);
+                    if (mediaTimeDelayMs < (mediaTimeUpdatePeriodMs / 5)) {
+                        mediaTimeDelayMs += mediaTimeUpdatePeriodMs;
+                    }
+                    delayMs =
+                            playbackSpeed == 1 ? mediaTimeDelayMs : (long) (mediaTimeDelayMs / playbackSpeed);
+                } else {
+                    delayMs = 200;
+                }
+            } else {
+                delayMs = 1000;
+            }
+            postDelayed(updateProgressAction, delayMs);
+        }
     }
 
     /**

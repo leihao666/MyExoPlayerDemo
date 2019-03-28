@@ -4,6 +4,13 @@
     android:layout_height="wrap_content"
     android:background="@color/colorPrimary">
 
+    <ProgressBar
+        android:id="@+id/progress_horizontal"
+        style="?android:progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:progressDrawable="@drawable/progressbar" />
+
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/iv_pic"
         android:layout_width="40dp"
