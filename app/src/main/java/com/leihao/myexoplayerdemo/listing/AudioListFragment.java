@@ -89,7 +89,6 @@ public class AudioListFragment extends DaggerFragment implements AudioListContra
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         audioListing.setLayoutManager(layoutManager);
         adapter = new AudioListingAdapter(audioBeans, audioBean -> {
-            player_bar.setVisibility(View.VISIBLE);
             int position = audioBeans.indexOf(audioBean);
             player_bar.seekTo(position);
             player.setPlayWhenReady(true);
@@ -144,13 +143,40 @@ public class AudioListFragment extends DaggerFragment implements AudioListContra
     public void onResume() {
         super.onResume();
         mPresenter.loadAudioList();
-        if (player != null
-                && player.getPlaybackState() != Player.STATE_IDLE
-                && player.getPlaybackState() != Player.STATE_ENDED
-                && player.getPlayWhenReady()) {
-            player_bar.setVisibility(View.VISIBLE);
-        } else {
-            player_bar.setVisibility(View.GONE);
+    }
+
+    private class DescriptionAdapter implements PlayerNotificationManager.MediaDescriptionAdapter {
+
+        @Override
+        public String getCurrentContentTitle(Player player) {
+            int window = player.getCurrentWindowIndex();
+            return getTitle(window);
+        }
+
+        @Nullable
+        @Override
+        public String getCurrentContentText(Player player) {
+            int window = player.getCurrentWindowIndex();
+            return getDescription(window);
+        }
+
+        @Nullable
+        @Override
+        public Bitmap getCurrentLargeIcon(Player player, PlayerNotificationManager.BitmapCallback callback) {
+            int window = player.getCurrentWindowIndex();
+            if (getLargeIconUri(window) != null) {
+                // load bitmap async
+                loadBitmap(getLargeIconUri(window), callback);
+                return getPlaceholderBitmap();
+            }
+            return null;
+        }
+
+        @Nullable
+        @Override
+        public PendingIntent createCurrentContentIntent(Player player) {
+            int window = player.getCurrentWindowIndex();
+            return createPendingIntent(window);
         }
     }
 
@@ -239,41 +265,6 @@ public class AudioListFragment extends DaggerFragment implements AudioListContra
     @Override
     public boolean isActive() {
         return isAdded();
-    }
-
-    private class DescriptionAdapter implements PlayerNotificationManager.MediaDescriptionAdapter {
-
-        @Override
-        public String getCurrentContentTitle(Player player) {
-            int window = player.getCurrentWindowIndex();
-            return getTitle(window);
-        }
-
-        @Nullable
-        @Override
-        public String getCurrentContentText(Player player) {
-            int window = player.getCurrentWindowIndex();
-            return getDescription(window);
-        }
-
-        @Nullable
-        @Override
-        public Bitmap getCurrentLargeIcon(Player player, PlayerNotificationManager.BitmapCallback callback) {
-            int window = player.getCurrentWindowIndex();
-            if (getLargeIconUri(window) != null) {
-                // load bitmap async
-                loadBitmap(getLargeIconUri(window), callback);
-                return getPlaceholderBitmap();
-            }
-            return null;
-        }
-
-        @Nullable
-        @Override
-        public PendingIntent createCurrentContentIntent(Player player) {
-            int window = player.getCurrentWindowIndex();
-            return createPendingIntent(window);
-        }
     }
 
     @Override
