@@ -23,6 +23,8 @@ public class NetworkModule {
     OkHttpClient provideOkHttpClient() {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         builder.connectTimeout(CONNECT_TIMEOUT_IN_MS, TimeUnit.MILLISECONDS);
+        builder.sslSocketFactory(SSLSocketClient.getSSLSocketFactory());
+        builder.hostnameVerifier(SSLSocketClient.getHostnameVerifier());
 
         if (BuildConfig.DEBUG) {
             HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
