@@ -56,6 +56,8 @@ public class AudioPlayerBar extends FrameLayout {
     private final Drawable pauseButtonDrawable;
     private final String playButtonContentDescription;
     private final String pauseButtonContentDescription;
+    private boolean wasPlayWhenReady;
+    private int lastPlaybackState;
 
     private Player player;
     private ControlDispatcher controlDispatcher;
@@ -86,6 +88,12 @@ public class AudioPlayerBar extends FrameLayout {
         eventListener = new Player.EventListener() {
             @Override
             public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+                if ((wasPlayWhenReady != playWhenReady && playbackState != Player.STATE_IDLE)
+                        || lastPlaybackState != playbackState) {
+                    updateNavigation();
+                }
+                wasPlayWhenReady = playWhenReady;
+                lastPlaybackState = playbackState;
                 updatePlayPauseButton();
                 updateProgress();
             }
@@ -157,7 +165,12 @@ public class AudioPlayerBar extends FrameLayout {
         }
         this.player = player;
         if (player != null) {
+            wasPlayWhenReady = player.getPlayWhenReady();
+            lastPlaybackState = player.getPlaybackState();
             player.addListener(eventListener);
+            if (lastPlaybackState != Player.STATE_IDLE) {
+                updateNavigation();
+            }
         }
         updateAll();
     }
@@ -194,25 +207,35 @@ public class AudioPlayerBar extends FrameLayout {
         if (haveNonEmptyTimeline && !player.isPlayingAd()) {
             int windowIndex = player.getCurrentWindowIndex();
             timeline.getWindow(windowIndex, window);
-            if (audioBeans != null && audioBeans.size() > windowIndex) {
-                AudioBean bean = audioBeans.get(windowIndex);
-                updateAudioInfo(bean);
-            }
         }
+        updateAudioInfo();
     }
 
-    private void updateAudioInfo(AudioBean data) {
+    private void updateAudioInfo() {
+        if (!isVisible()) {
+            return;
+        }
+        AudioBean bean = null;
+        if (player != null) {
+            int windowIndex = player.getCurrentWindowIndex();
+            if (audioBeans != null && audioBeans.size() > windowIndex) {
+                bean = audioBeans.get(windowIndex);
+            }
+        }
+        if (bean == null) {
+            return;
+        }
         RequestOptions options = new RequestOptions()
                 .centerCrop()
                 .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                 .priority(Priority.NORMAL);
         Glide.with(getContext())
                 .asBitmap()
-                .load(data.speechImage)
+                .load(bean.speechImage)
                 .apply(options)
                 .into(iv_pic);
-        tv_name.setText(data.speechName);
-        tv_artist.setText(data.speechDesc);
+        tv_name.setText(bean.speechName);
+        tv_artist.setText(bean.speechDesc);
     }
 
     private void updateProgress() {
