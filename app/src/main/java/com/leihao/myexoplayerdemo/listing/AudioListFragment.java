@@ -102,6 +102,7 @@ public class AudioListFragment extends DaggerFragment implements AudioListContra
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mPresenter.takeView(this);
+        mPresenter.loadAudioList();
         initPlayer();
     }
 
@@ -137,12 +138,6 @@ public class AudioListFragment extends DaggerFragment implements AudioListContra
         notificationChannel.setDescription(desc);
 
         notificationManager.createNotificationChannel(notificationChannel);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        mPresenter.loadAudioList();
     }
 
     private class DescriptionAdapter implements PlayerNotificationManager.MediaDescriptionAdapter {
