@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme" parent="AppBaseTheme">
+        <item name="android:windowTranslucentStatus">true</item>
+        <!--状态栏字体黑色-->
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+    <style name="AppTheme.Dark" parent="AppBaseTheme">
+        <item name="android:windowTranslucentStatus">true</item>
+        <!--状态栏字体白色-->
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

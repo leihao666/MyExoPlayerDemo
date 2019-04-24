@@ -3,17 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     android:orientation="vertical"
-    tools:context=".listing.AudioListActivity">
+    tools:context=".detail.AudioDetailActivity">
 
-    <include layout="@layout/toolbar" />
-
-    <fragment
-        android:id="@+id/fragment_listing"
-        android:name="com.leihao.myexoplayerdemo.listing.AudioListFragment"
+    <FrameLayout
+        android:id="@+id/audio_details_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:layout="@layout/fragment_audio_list" />
-
+        tools:layout="@layout/fragment_audio_detail" />
 </LinearLayout>

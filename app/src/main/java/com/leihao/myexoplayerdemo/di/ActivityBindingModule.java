@@ -1,5 +1,7 @@
 package com.leihao.myexoplayerdemo.di;
 
+import com.leihao.myexoplayerdemo.detail.AudioDetailActivity;
+import com.leihao.myexoplayerdemo.detail.AudioDetailModule;
 import com.leihao.myexoplayerdemo.listing.AudioListActivity;
 import com.leihao.myexoplayerdemo.listing.AudioListModule;
 
@@ -19,4 +21,8 @@ public abstract class ActivityBindingModule {
     @ActivityScoped
     @ContributesAndroidInjector(modules = AudioListModule.class)
     abstract AudioListActivity audioListActivity();
+
+    @ActivityScoped
+    @ContributesAndroidInjector(modules = AudioDetailModule.class)
+    abstract AudioDetailActivity audioDetailActivity();
 }

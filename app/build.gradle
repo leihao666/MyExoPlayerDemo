@@ -10,6 +10,8 @@ android {
         versionCode 1
         versionName "1.0"
 
+        multiDexEnabled true
+
         buildConfigField "String", "AUDIO_BASE_URL", "\"https://test1.dyly.com\""
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }

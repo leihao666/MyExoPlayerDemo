@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">MyExoPlayerDemo</string>
+    <string name="playback_channel_name">音频播放</string>
 </resources>
