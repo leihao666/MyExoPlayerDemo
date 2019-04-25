@@ -3,7 +3,6 @@ package com.leihao.myexoplayerdemo.player;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.app.TaskStackBuilder;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -182,16 +181,10 @@ public class AudioPlayerService extends Service {
         if (window >= audioBeans.size()) {
             return null;
         }
-        // Create an Intent for the activity you want to start
         Intent resultIntent = new Intent(this, AudioDetailActivity.class);
-//        resultIntent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);//关键的一步，设置启动模式
         resultIntent.putExtra(AppConstants.AUDIO_BEAN, audioBeans.get(window));
-        // Create the TaskStackBuilder and add the intent, which inflates the back stack
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-//        stackBuilder.addParentStack(AudioDetailActivity.class);
-        stackBuilder.addNextIntentWithParentStack(resultIntent);
-        // Get the PendingIntent containing the entire back stack
-        return stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        return PendingIntent.getActivity(this, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     private void preparePlay() {
