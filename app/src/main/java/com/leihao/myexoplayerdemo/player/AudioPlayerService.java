@@ -200,6 +200,11 @@ public class AudioPlayerService extends Service {
     }
 
     @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        releasePlayer();
+    }
+
+    @Override
     public void onDestroy() {
         releasePlayer();
         super.onDestroy();
