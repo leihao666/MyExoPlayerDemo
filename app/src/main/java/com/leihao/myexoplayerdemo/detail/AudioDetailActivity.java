@@ -8,6 +8,8 @@ import com.leihao.myexoplayerdemo.R;
 import com.leihao.myexoplayerdemo.data.AudioBean;
 import com.leihao.myexoplayerdemo.util.ActivityUtils;
 
+import java.util.ArrayList;
+
 import javax.inject.Inject;
 
 import dagger.android.support.DaggerAppCompatActivity;
@@ -24,15 +26,15 @@ public class AudioDetailActivity extends DaggerAppCompatActivity {
 
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
-            if (extras != null && extras.containsKey(AppConstants.AUDIO_BEAN)) {
-                AudioBean bean = extras.getParcelable(AppConstants.AUDIO_BEAN);
-                if (bean != null) {
+            if (extras != null && extras.containsKey(AppConstants.AUDIO_BEAN_LIST)) {
+                ArrayList<AudioBean> audioBeans = extras.getParcelableArrayList(AppConstants.AUDIO_BEAN_LIST);
+                if (audioBeans != null) {
                     AudioDetailFragment audioDetailFragment = (AudioDetailFragment) getSupportFragmentManager().findFragmentById(R.id.audio_details_container);
 
                     if (audioDetailFragment == null) {
                         audioDetailFragment = fragment;
                         Bundle args = new Bundle();
-                        args.putParcelable(AppConstants.AUDIO_BEAN, bean);
+                        args.putParcelableArrayList(AppConstants.AUDIO_BEAN_LIST, audioBeans);
                         audioDetailFragment.setArguments(args);
                         ActivityUtils.addFragmentToActivity(getSupportFragmentManager(), audioDetailFragment, R.id.audio_details_container);
                     }

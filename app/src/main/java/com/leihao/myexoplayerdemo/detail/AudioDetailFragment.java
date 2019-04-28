@@ -4,31 +4,23 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.graphics.Palette;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.Priority;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.RequestOptions;
-import com.bumptech.glide.request.target.BitmapImageViewTarget;
-import com.bumptech.glide.request.transition.Transition;
 import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.ui.PlayerView;
 import com.leihao.myexoplayerdemo.AppConstants;
 import com.leihao.myexoplayerdemo.R;
 import com.leihao.myexoplayerdemo.data.AudioBean;
 import com.leihao.myexoplayerdemo.di.ActivityScoped;
 import com.leihao.myexoplayerdemo.player.AudioPlayerService;
+import com.leihao.myexoplayerdemo.player.AudioPlayerView;
+
+import java.util.ArrayList;
 
 import javax.inject.Inject;
 
@@ -40,18 +32,10 @@ import dagger.android.support.DaggerFragment;
 @ActivityScoped
 public class AudioDetailFragment extends DaggerFragment {
 
-    @BindView(R.id.iv_background)
-    ImageView iv_background;
-    @BindView(R.id.iv_pic)
-    ImageView iv_pic;
-    @BindView(R.id.tv_name)
-    TextView tv_name;
-    @BindView(R.id.tv_artist)
-    TextView tv_artist;
-    @BindView(R.id.playerView)
-    PlayerView playerView;
+    @BindView(R.id.player_view)
+    AudioPlayerView playerView;
 
-    private AudioBean bean;
+    private ArrayList<AudioBean> audioBeans;
     private AudioPlayerService mService;
     private Intent intent;
     private boolean mBound = false;
@@ -94,14 +78,11 @@ public class AudioDetailFragment extends DaggerFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         if (getArguments() != null) {
-            AudioBean bean = (AudioBean) getArguments().get(AppConstants.AUDIO_BEAN);
-            if (bean != null) {
-                this.bean = bean;
+
+            ArrayList<AudioBean> audioBeans = getArguments().getParcelableArrayList(AppConstants.AUDIO_BEAN_LIST);
+            if (audioBeans != null) {
+                this.audioBeans = audioBeans;
                 intent = new Intent(getContext(), AudioPlayerService.class);
-                playerView.setUseController(true);
-                playerView.showController();
-                playerView.setControllerAutoShow(true);
-                playerView.setControllerHideOnTouch(false);
             }
         }
     }
@@ -122,34 +103,20 @@ public class AudioDetailFragment extends DaggerFragment {
     }
 
     private void setUI() {
-        RequestOptions options = new RequestOptions()
-                .centerCrop()
-                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                .priority(Priority.NORMAL);
-
-        Glide.with(this)
-                .asBitmap()
-                .load(bean.speechImage)
-                .apply(options)
-                .into(new BitmapImageViewTarget(iv_pic) {
-                    @Override
-                    public void onResourceReady(Bitmap bitmap, @Nullable Transition<? super Bitmap> transition) {
-                        super.onResourceReady(bitmap, transition);
-                        Palette.from(bitmap).generate(palette -> setBackgroundColor(palette, iv_background));
-                    }
-                });
-
-        tv_name.setText(bean.speechName);
-        tv_artist.setText(bean.speechDesc);
+        playerView.setAudioList(audioBeans);
     }
 
-    private void setBackgroundColor(Palette palette, View view) {
-        view.setBackgroundColor(palette.getVibrantColor(getResources().getColor(R.color.black_translucent_60)));
+    @Override
+    public void onStop() {
+        getActivity().unbindService(mConnection);
+        mBound = false;
+        super.onStop();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        playerView.setPlayer(null);
         unbinder.unbind();
     }
 }

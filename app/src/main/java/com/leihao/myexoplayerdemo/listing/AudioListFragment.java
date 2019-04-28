@@ -97,13 +97,8 @@ public class AudioListFragment extends DaggerFragment implements AudioListContra
     }
 
     private void showAudioDetailUi() {
-        int window = player.getCurrentWindowIndex();
-        if (window >= audioBeans.size()) {
-            return;
-        }
-        AudioBean bean = audioBeans.get(window);
         Intent intent = new Intent(getContext(), AudioDetailActivity.class);
-        intent.putExtra(AppConstants.AUDIO_BEAN, bean);
+        intent.putExtra(AppConstants.AUDIO_BEAN_LIST, audioBeans);
         startActivity(intent);
     }
 

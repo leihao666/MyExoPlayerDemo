@@ -34,7 +34,6 @@ import com.leihao.myexoplayerdemo.detail.AudioDetailActivity;
 import com.leihao.myexoplayerdemo.util.DownloadUtil;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class AudioPlayerService extends Service {
 
@@ -43,7 +42,7 @@ public class AudioPlayerService extends Service {
     private CacheDataSourceFactory cacheDataSourceFactory;
     private PlayerNotificationManager playerNotificationManager;
 
-    private List<AudioBean> audioBeans = new ArrayList<>();
+    private ArrayList<AudioBean> audioBeans = new ArrayList<>();
 
     @Override
     public void onCreate() {
@@ -183,7 +182,7 @@ public class AudioPlayerService extends Service {
         }
         Intent resultIntent = new Intent(this, AudioDetailActivity.class);
         resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);//关键的一步，设置启动模式
-        resultIntent.putExtra(AppConstants.AUDIO_BEAN, audioBeans.get(window));
+        resultIntent.putParcelableArrayListExtra(AppConstants.AUDIO_BEAN_LIST, audioBeans);
         return PendingIntent.getActivity(this, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
