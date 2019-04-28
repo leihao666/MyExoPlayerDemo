@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
@@ -113,7 +114,11 @@ public class AudioListFragment extends DaggerFragment implements AudioListContra
 
     private void startService() {
         intent.putParcelableArrayListExtra(AppConstants.AUDIO_BEAN_LIST, audioBeans);
-        getActivity().startService(intent); // 开启服务
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { // 开启服务
+            getActivity().startForegroundService(intent);
+        } else {
+            getActivity().startService(intent);
+        }
     }
 
     @Override
