@@ -12,12 +12,13 @@ import java.util.ArrayList;
 
 import javax.inject.Inject;
 
+import dagger.Lazy;
 import dagger.android.support.DaggerAppCompatActivity;
 
 public class AudioDetailActivity extends DaggerAppCompatActivity {
 
     @Inject
-    AudioDetailFragment fragment;
+    Lazy<AudioDetailFragment> audioDetailFragmentProvider;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -32,7 +33,7 @@ public class AudioDetailActivity extends DaggerAppCompatActivity {
                     AudioDetailFragment audioDetailFragment = (AudioDetailFragment) getSupportFragmentManager().findFragmentById(R.id.audio_details_container);
 
                     if (audioDetailFragment == null) {
-                        audioDetailFragment = fragment;
+                        audioDetailFragment = audioDetailFragmentProvider.get();
                         Bundle args = new Bundle();
                         args.putParcelableArrayList(AppConstants.AUDIO_BEAN_LIST, audioBeans);
                         audioDetailFragment.setArguments(args);

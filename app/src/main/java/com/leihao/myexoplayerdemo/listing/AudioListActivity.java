@@ -9,12 +9,13 @@ import com.leihao.myexoplayerdemo.util.ActivityUtils;
 
 import javax.inject.Inject;
 
+import dagger.Lazy;
 import dagger.android.support.DaggerAppCompatActivity;
 
 public class AudioListActivity extends DaggerAppCompatActivity {
 
     @Inject
-    AudioListFragment fragment;
+    Lazy<AudioListFragment> audioListFragmentProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,7 +24,7 @@ public class AudioListActivity extends DaggerAppCompatActivity {
 
         AudioListFragment audioListFragment = (AudioListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_listing);
         if (audioListFragment == null) {
-            audioListFragment = fragment;
+            audioListFragment = audioListFragmentProvider.get();
             ActivityUtils.addFragmentToActivity(getSupportFragmentManager(), audioListFragment, R.id.fragment_listing);
         }
     }
