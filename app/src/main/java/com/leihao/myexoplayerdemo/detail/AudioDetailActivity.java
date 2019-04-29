@@ -1,7 +1,7 @@
 package com.leihao.myexoplayerdemo.detail;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.leihao.myexoplayerdemo.AppConstants;
 import com.leihao.myexoplayerdemo.R;

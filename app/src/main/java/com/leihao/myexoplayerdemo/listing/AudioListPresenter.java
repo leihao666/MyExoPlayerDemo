@@ -1,6 +1,6 @@
 package com.leihao.myexoplayerdemo.listing;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.leihao.myexoplayerdemo.data.AudioBean;
 import com.leihao.myexoplayerdemo.data.network.AudioWebService;
