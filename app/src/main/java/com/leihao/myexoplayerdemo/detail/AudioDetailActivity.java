@@ -1,6 +1,7 @@
 package com.leihao.myexoplayerdemo.detail;
 
 import android.os.Bundle;
+
 import androidx.annotation.Nullable;
 
 import com.leihao.myexoplayerdemo.AppConstants;

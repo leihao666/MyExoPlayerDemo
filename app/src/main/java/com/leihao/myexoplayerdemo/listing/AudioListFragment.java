@@ -7,16 +7,17 @@ import android.content.ServiceConnection;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import com.google.android.material.snackbar.Snackbar;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.material.snackbar.Snackbar;
 import com.leihao.myexoplayerdemo.AppConstants;
 import com.leihao.myexoplayerdemo.R;
 import com.leihao.myexoplayerdemo.data.AudioBean;

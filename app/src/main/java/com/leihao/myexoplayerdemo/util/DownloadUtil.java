@@ -10,8 +10,13 @@ import java.io.File;
 
 public class DownloadUtil {
 
+    private static Cache cache;
+
     public static Cache getCache(Context context) {
         File cacheFile = new File(context.getApplicationContext().getExternalCacheDir().getAbsolutePath(), "video");
-        return new SimpleCache(cacheFile, new LeastRecentlyUsedCacheEvictor(512 * 1024 * 1024));
+        if (cache == null) {
+            cache = new SimpleCache(cacheFile, new LeastRecentlyUsedCacheEvictor(512 * 1024 * 1024));
+        }
+        return cache;
     }
 }
